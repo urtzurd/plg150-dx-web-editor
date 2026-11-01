@@ -21,6 +21,10 @@
 
 * { box-sizing: border-box; }
 
+/* Always reserve the scrollbar's space, so switching between a tall tab (Voice)
+   and a short one doesn't change the page width and shift everything sideways. */
+html { scrollbar-gutter: stable; }
+
 body {
   margin: 0;
   background: var(--bg);
