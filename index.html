@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PLG150-DX Editor</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="setup">
+  <div class="brand">
+    <span class="brand-main">PLG150-DX</span>
+    <span class="brand-sub">Voice Editor &amp; Librarian</span>
+  </div>
+  <div class="setup-fields">
+    <label title="MIDI output port connected to the host synth with the PLG150-DX">MIDI Out <select id="midiOut"></select></label>
+    <label title="Device Number set on the host synth that has the PLG150-DX installed">Device ID
+      <select id="deviceId"></select></label>
+    <label title="Channel for notes, wheels and controllers">Kbd Ch
+      <select id="midiChannel"></select></label>
+    <label title="Part number used in PLG150-DX Native Multi Part messages (60 pp xx)">PLG Part
+      <select id="plgPart"></select></label>
+    <button id="midiConnect" class="btn" title="Request MIDI access and scan for output ports">Enable MIDI</button>
+    <span id="midiStatus" class="status">MIDI off</span>
+  </div>
+</header>
+
+<main>
+  <!-- ===== DX panel: cartridge, LCD, voice select ===== -->
+  <section class="panel dx-panel">
+    <div class="btn-group cart-group">
+      <span class="group-label">CARTRIDGE</span>
+      <div class="group-items column">
+        <select id="cartSelect" aria-label="Cartridge" title="Cartridge (32-voice bank) shown in the voice buttons"></select>
+        <div class="btn-row">
+          <button class="btn" id="loadFile" title="Load a voice or 32-voice bank .syx file">Open .syx…</button>
+          <button class="btn" id="saveCart" title="Save the current cartridge as a .syx file (VMEM + AMEM)">Save .syx</button>
+        </div>
+      </div>
+      <input type="file" id="fileInput" accept=".syx,.SYX,.bin,application/octet-stream" hidden>
+    </div>
+
+    <div class="lcd-area">
+      <div class="lcd-row">
+        <div class="led" id="led" role="img" aria-label="Voice 01"><svg id="ledSvg" class="led-svg"></svg></div>
+        <div class="lcd">
+          <div class="lcd-line" id="lcd1">CARTRIDGE  ROM1A</div>
+          <div class="lcd-line" id="lcd2">V01 BRASS   1</div>
+        </div>
+      </div>
+      <div class="btn-group">
+        <span class="group-label">VOICE</span>
+        <div class="group-items">
+          <button class="btn" id="storeVoice" title="Store the edit buffer into the selected cartridge slot">Store…</button>
+          <button class="btn" id="initVoice" title="Reset the edit buffer to INIT VOICE">Init</button>
+          <button class="btn" id="exportVoice" title="Save this voice as a VCED+ACED .syx">Export</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="action-area">
+      <div class="btn-group">
+        <span class="group-label">BANK → PLG USER</span>
+        <div class="group-items">
+          <select id="bulkBlock" aria-label="User block" title="PLG user voice block that Send Bank writes to">
+            <option value="0">Voices 1–32</option>
+            <option value="1">Voices 33–64</option>
+          </select>
+          <button class="btn primary" id="sendBank" title="Send AMEM + VMEM 32-voice bulk">Send Bank</button>
+          <label class="check" title="Also send AMEM, the DX7II extra voice parameters (AMS, pitch bend, portamento, mono mode, unison detune…). Uncheck to send only the original DX7 voice data (VMEM)."><input type="checkbox" id="sendAmem" checked> + AMEM</label>
+        </div>
+      </div>
+      <div class="btn-group">
+        <span class="group-label">EDIT BUFFER</span>
+        <div class="group-items">
+          <button class="btn primary" id="sendVoice" title="Send ACED + VCED bulk to the PLG150-DX edit buffer">Send Voice</button>
+          <button class="btn" id="compare" title="Toggle between edited and original voice">Compare</button>
+          <label class="check" title="Send each parameter change to the PLG150-DX edit buffer as you edit, so you hear it immediately"><input type="checkbox" id="liveSend" checked> Live edit</label>
+          <label class="check" title="Send the voice to the edit buffer when you click a voice button"><input type="checkbox" id="autoSend" checked> Auto send</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="voice-grid" id="voiceGrid"></div>
+  </section>
+
+  <!-- ===== Tabs ===== -->
+  <nav class="tabs" role="tablist">
+    <button role="tab" class="tab active" data-tab="voice" title="Voice parameters (VCED): algorithm, LFO, pitch EG and the six operators">Voice</button>
+    <button role="tab" class="tab" data-tab="function" title="DX7II additional parameters, part of the voice (ACED / AMEM). They are sent with Send Voice / Send Bank and, with Live edit on, as ACED parameter changes.">Function / Additional</button>
+    <button role="tab" class="tab" data-tab="native" title="PLG150-DX Native parameters (model ID 62h), sent immediately when changed. The board cannot be queried, so these are the editor's last sent values, not read from the board. Multi Part messages use the PLG Part number from the top bar.">PLG150-DX Native</button>
+    <button role="tab" class="tab" data-tab="monitor" title="Log of the MIDI messages sent to the synth">MIDI Monitor</button>
+  </nav>
+
+  <!-- Voice -->
+  <section class="tab-page active" id="tab-voice">
+    <div class="global-row">
+      <div class="panel block alg-block">
+        <h3>Algorithm</h3>
+        <svg id="algSvg" class="alg-svg"></svg>
+        <div class="fields" id="algFields"></div>
+      </div>
+      <div class="panel block">
+        <h3>LFO</h3>
+        <div class="fields" id="lfoFields"></div>
+      </div>
+      <div class="panel block">
+        <h3>Pitch EG</h3>
+        <svg class="eg" id="pegSvg"></svg>
+        <div class="fields eg-fields" id="pegFields"></div>
+      </div>
+      <div class="panel block">
+        <h3>Voice</h3>
+        <div class="fields" id="voiceFields"></div>
+      </div>
+    </div>
+    <div class="ops" id="ops"><svg class="ops-lines" id="opsLines" aria-hidden="true"></svg></div>
+  </section>
+
+  <!-- Function / ACED -->
+  <section class="tab-page" id="tab-function">
+    <div class="global-row">
+      <div class="panel block"><h3>Key Mode</h3><div class="fields" id="fnModeFields"></div></div>
+      <div class="panel block"><h3>Pitch Bend</h3><div class="fields" id="fnBendFields"></div></div>
+      <div class="panel block"><h3>Portamento</h3><div class="fields" id="fnPortaFields"></div></div>
+      <div class="panel block"><h3>Pitch EG / LFO</h3><div class="fields" id="fnPegFields"></div></div>
+      <div class="panel block"><h3>Amp Mod Sensitivity (0–7)</h3><div class="fields" id="fnAmsFields"></div></div>
+    </div>
+  </section>
+
+  <!-- Native -->
+  <section class="tab-page" id="tab-native">
+    <div class="global-row">
+      <div class="panel block"><h3>System</h3><div class="fields" id="nativeSysFields"></div></div>
+      <div class="panel block"><h3>AC4 / Receive</h3><div class="fields" id="nativeAcFields"></div></div>
+      <div class="panel block"><h3>Portamento / Bend</h3><div class="fields" id="nativePortaFields"></div></div>
+      <div class="panel block"><h3>Carrier Level Offset</h3><div class="fields" id="nativeCarFields"></div></div>
+      <div class="panel block"><h3>Modulator Level Offset</h3><div class="fields" id="nativeModFields"></div></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" id="sendNativeAll" title="Send every native Part and System setting below to the PLG">Send all native Part settings</button>
+      <button class="btn" id="resetNative" title="Reset the native settings to their defaults and send them">Reset to defaults</button>
+    </div>
+  </section>
+
+  <!-- Monitor -->
+  <section class="tab-page" id="tab-monitor">
+    <div class="btn-row">
+      <button class="btn" id="clearLog" title="Clear the log">Clear</button>
+      <label class="check" title="Also log the outgoing note, pitch bend and controller messages (SysEx is always logged)"><input type="checkbox" id="logNotes"> Log notes &amp; wheels</label>
+    </div>
+    <pre class="log" id="log"></pre>
+  </section>
+</main>
+
+<!-- ===== Performance controls ===== -->
+<footer class="perf">
+  <button class="perf-toggle" id="perfToggle" type="button" aria-expanded="true" aria-controls="keyboard">▼ Keyboard</button>
+  <div class="wheels">
+    <div class="wheel-box">
+      <div class="wheel" id="pitchWheel" title="Pitch bend (springs back)"><div class="wheel-thumb"></div></div>
+      <span>PITCH</span>
+    </div>
+    <div class="wheel-box">
+      <div class="wheel" id="modWheel" title="Modulation wheel (CC1)"><div class="wheel-thumb"></div></div>
+      <span>MOD</span>
+    </div>
+  </div>
+  <div class="perf-controls">
+    <label title="Velocity of notes played with the on-screen or computer keyboard">Velocity <input type="range" id="velocity" min="1" max="127" value="100"><output id="velOut">100</output></label>
+    <div class="btn-row">
+      <button class="btn small" id="octDown" title="Shift the on-screen keyboard down one octave">Oct −</button>
+      <span id="octLabel" class="oct">C1–C6</span>
+      <button class="btn small" id="octUp" title="Shift the on-screen keyboard up one octave">Oct +</button>
+    </div>
+    <div class="btn-row">
+      <button class="btn small" id="sustain" title="Sustain pedal (CC64)">Sustain</button>
+      <button class="btn small danger" id="panic" title="All Sound Off + All Notes Off + Reset Controllers">Panic</button>
+    </div>
+    <span class="hint">Computer keys: Z–M / Q–U</span>
+  </div>
+  <div class="keyboard" id="keyboard"></div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="js/roms.js"></script>
+<script src="js/dx7.js"></script>
+<script src="js/midi.js"></script>
+<script src="js/graphics.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
