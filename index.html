@@ -4,6 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PLG150-DX Editor</title>
+  <link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/favicon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="icons/favicon-512.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -63,11 +68,11 @@
       <div class="btn-group">
         <span class="group-label">BANK → PLG USER</span>
         <div class="group-items">
-          <select id="bulkBlock" aria-label="User block" title="PLG user voice block that Send Bank writes to">
+          <select id="bulkBlock" aria-label="User block" title="Voices of the PLG User bank (Bank MSB 35, LSB 0) that Send Bank writes to">
             <option value="0">Voices 1–32</option>
             <option value="1">Voices 33–64</option>
           </select>
-          <button class="btn primary" id="sendBank" title="Send AMEM + VMEM 32-voice bulk">Send Bank</button>
+          <button class="btn primary" id="sendBank" title="Send this cartridge (AMEM + VMEM 32-voice bulk) to the PLG150-DX User bank (Bank MSB 35, LSB 0), voices 1–32 or 33–64 as chosen. To hear them, select that bank on the part.">Send Bank</button>
           <label class="check" title="Also send AMEM, the DX7II extra voice parameters (AMS, pitch bend, portamento, mono mode, unison detune…). Uncheck to send only the original DX7 voice data (VMEM)."><input type="checkbox" id="sendAmem" checked> + AMEM</label>
         </div>
       </div>

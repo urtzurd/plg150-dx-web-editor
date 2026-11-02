@@ -28,7 +28,7 @@ channel (the host synth's receive channel for the PLG150-DX part) and the PLG Pa
 |---|---|
 | Edit a voice parameter (Live edit on) | DX parameter change `F0 43 1n gg pp vv F7` (VCED g=0, ACED g=6) |
 | Send Voice (edit buffer) | ACED bulk (fmt 05, 49 bytes), VCED bulk (fmt 00, 155 bytes), then the operator on/off parameter (VCED 155) |
-| Send Bank | Native `00 00 0E` (32-voice receive block), AMEM (fmt 06, if **+ AMEM** is checked), VMEM (fmt 09) |
+| Send Bank | Native `00 00 0E` (32-voice receive block), AMEM (fmt 06, if **+ AMEM** is checked), VMEM (fmt 09), to the User bank (Bank MSB 35, LSB 0) |
 | Native tab | `F0 43 1n 62 00 00 xx vv F7` (system), `F0 43 1n 62 60 pp xx vv F7` (part) |
 | Keyboard / wheels | Note on/off, pitch bend, CC1, CC64 on the keyboard channel |
 | Panic | CC120 (All Sound Off), CC123 (All Notes Off), CC121 (Reset Controllers) |
@@ -38,14 +38,16 @@ channel (the host synth's receive channel for the PLG150-DX part) and the PLG Pa
 - **RcvDxSysEx** must be ON (in the board's part settings, or on the Native tab).
 - The VCED/ACED edit buffer is only heard when a **PLG150-DX user voice** is selected
   (the manual: "Bulk select: User Bank"). Select a PLG user voice on the host synth first.
-- **Send Bank** writes 32 voices into PLG user voices 1–32 or 33–64. Store them on the
-  host synth as described in its manual if you want to keep them.
+- **Send Bank** writes 32 voices into PLG user voices 1–32 or 33–64 of the **User bank,
+  Bank MSB 35 / LSB 0** (programs 1–32 or 33–64). Select that bank on the part to hear them.
+  Store them on the host synth as described in its manual if you want to keep them.
 - The board can't send its data back, so the editor works from its own copy: the DX7 ROM
   cartridges (built in) and `.syx` files you open. No MIDI input is used.
 
 ## Files
 
 - `index.html`, `css/style.css`: the UI
+- `favicon.ico`, `icons/`: the page icons (16–512 px PNG renders)
 - `js/dx7.js`: voice model and VMEM/VCED/AMEM/ACED conversion
 - `js/midi.js`: Web MIDI and SysEx builders
 - `js/graphics.js`: algorithm diagrams and EG graphs
