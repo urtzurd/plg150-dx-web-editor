@@ -1,5 +1,5 @@
 {
-  "id": "./",
+  "id": "/plg150-dx-web-editor/",
   "name": "PLG150-DX Editor",
   "short_name": "PLG150-DX",
   "description": "Web MIDI editor and librarian for the Yamaha PLG150-DX FM synthesis plug-in board.",
