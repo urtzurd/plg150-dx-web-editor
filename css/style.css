@@ -16,6 +16,7 @@
   --key-white: #f4efe6;
   --key-black: #1b1817;
   --key-active: #e0574f;
+  --u: 1px;                   /* Voice page scale unit: 1px, or growing with the page width at UI Scaling "Auto" */
   font-size: 14px;
 }
 
@@ -101,6 +102,13 @@ body.dragging, body.dragging * { cursor: ns-resize !important; user-select: none
 .check { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--muted); white-space: nowrap; }
 
 main { padding: 12px 16px; max-width: 1512px; margin: 0 auto; }
+body.ui-auto main { max-width: 1840px; }   /* UI Scaling "Auto": room for the scaled Voice page */
+/* Voice page sizes are in --u, a "page pixel": 1px at UI Scaling "Fixed". With UI
+   Scaling "Auto" (body.ui-auto) it grows with the width of the Voice page (from about
+   1300px windows, up to 1.5px), so wider windows get bigger fields and panels. */
+#tab-voice { container-type: inline-size; }
+body.ui-auto #tab-voice > * { --u: clamp(1px, (100cqi - 216px) / 1100, 1.5px); }
+#tab-voice .block .field input, #tab-voice .block .field select { font-size: calc(14 * var(--u)); padding: calc(3 * var(--u)) calc(5 * var(--u)); }
 
 .panel {
   background: var(--panel);
@@ -173,14 +181,14 @@ main { padding: 12px 16px; max-width: 1512px; margin: 0 auto; }
 
 .global-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: stretch; }
 .global-row + .btn-row { margin-top: 10px; }
-.block { padding: 10px; min-width: 180px; flex: 1 1 200px; }
-.block h3, .op h3 { margin: 0 0 8px; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent-2); }
-.alg-block { flex: 0 1 260px; }
+.block { padding: calc(10 * var(--u)); min-width: calc(180 * var(--u)); flex: 1 1 calc(200 * var(--u)); }
+.block h3, .op h3 { margin: 0 0 calc(8 * var(--u)); font-size: calc(11 * var(--u)); letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent-2); }
+.alg-block { flex: 0 1 calc(260 * var(--u)); }
 .alg-block .fields { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 
-.fields { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 6px 8px; }
+.fields { display: grid; grid-template-columns: repeat(auto-fill, minmax(calc(90 * var(--u)), 1fr)); gap: calc(6 * var(--u)) calc(8 * var(--u)); }
 .field { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.field > span { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; user-select: none; }
+.field > span { font-size: calc(10 * var(--u)); color: var(--muted); text-transform: uppercase; letter-spacing: .4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; user-select: none; }
 .field.num > span { cursor: ns-resize; }
 .field input[type=number], .field select, .field input[type=text] { width: 100%; }
 .field.disabled { opacity: .35; }
@@ -203,7 +211,7 @@ main { padding: 12px 16px; max-width: 1512px; margin: 0 auto; }
 .note { color: var(--muted); font-size: 12px; max-width: 900px; }
 
 /* ---------- algorithm svg ---------- */
-.alg-svg { width: 100%; height: auto; display: block; margin-bottom: 8px; }
+.alg-svg { width: 100%; height: auto; display: block; margin-bottom: calc(8 * var(--u)); }
 .alg-lines path { fill: none; stroke: var(--muted); stroke-width: 1.5; }
 .alg-lines .alg-fb { stroke: var(--accent-3); stroke-dasharray: 3 2; }
 .alg-op { cursor: pointer; }
@@ -214,7 +222,7 @@ main { padding: 12px 16px; max-width: 1512px; margin: 0 auto; }
 .alg-op.off text { fill: #666; }
 
 /* ---------- envelope svg ---------- */
-.eg { width: 100%; height: 64px; display: block; background: #191512; border: 1px solid var(--line); border-radius: 2px; margin-bottom: 6px; }
+.eg { width: 100%; height: calc(64 * var(--u)); display: block; background: #191512; border: 1px solid var(--line); border-radius: 2px; margin-bottom: calc(6 * var(--u)); }
 .eg-line { fill: none; stroke: var(--accent-2); stroke-width: 1.6; vector-effect: non-scaling-stroke; }
 .eg-fill { fill: rgba(111, 163, 155, .18); }
 .eg-axis { stroke: #3c332d; stroke-width: 1; vector-effect: non-scaling-stroke; }
@@ -222,13 +230,13 @@ main { padding: 12px 16px; max-width: 1512px; margin: 0 auto; }
 
 /* ---------- operators ---------- */
 /* Columns and rows are set from the algorithm in app.js. --op-w is one panel's
-   width: at most 250px, and small enough that 6 columns (algorithm 32) fit. */
+   width: at most 250px (times the UI scale), and small enough that 6 columns (algorithm 32) fit. */
 .ops {
   --op-gap: 12px;
-  --op-w: min(250px, calc((100% - 5 * var(--op-gap)) / 6));
-  position: relative; display: grid; column-gap: var(--op-gap); row-gap: 30px;
+  --op-w: min(calc(250 * var(--u)), calc((100% - 5 * var(--op-gap)) / 6));
+  position: relative; display: grid; column-gap: var(--op-gap); row-gap: calc(30 * var(--u));
   justify-content: start; align-items: start;
-  margin-top: 10px; padding: 14px 0 34px;
+  margin-top: 10px; padding: calc(14 * var(--u)) 0 calc(34 * var(--u));
 }
 .ops > .op { z-index: 1; min-width: 0; }
 .ops-lines { position: absolute; left: 0; top: 0; pointer-events: none; overflow: visible; z-index: 0; }
@@ -237,28 +245,28 @@ main { padding: 12px 16px; max-width: 1512px; margin: 0 auto; }
 .ops-lines .op-out { stroke: var(--carrier); }
 .ops-lines .off { stroke-dasharray: 4 3; opacity: .5; }
 .ops-lines .op-fb { stroke: var(--accent-3); stroke-dasharray: 4 3; }
-.ops-lines .op-out-label { fill: var(--carrier); font-size: 11px; font-weight: 700; letter-spacing: 1px; }
-.op { padding: 8px; position: relative; }
+.ops-lines .op-out-label { fill: var(--carrier); font-size: calc(11 * var(--u)); font-weight: 700; letter-spacing: 1px; }
+.op { padding: calc(8 * var(--u)); position: relative; }
 .op.carrier { border-color: #7a6030; }
 .op.off { opacity: .55; }
-.op-head { display: flex; flex-wrap: nowrap; align-items: center; gap: 6px; margin-bottom: 8px; }
-.op-head h3 { margin: 0; font-size: 15px; color: var(--text); letter-spacing: 1px; }
-.op-head .btn { padding: 2px 7px; font-size: 11px; }
+.op-head { display: flex; flex-wrap: nowrap; align-items: center; gap: calc(6 * var(--u)); margin-bottom: calc(8 * var(--u)); }
+.op-head h3 { margin: 0; font-size: calc(15 * var(--u)); color: var(--text); letter-spacing: 1px; }
+.op-head .btn { padding: calc(2 * var(--u)) calc(7 * var(--u)); font-size: calc(11 * var(--u)); }
 .op-head .push-right { margin-left: auto; }
-.op-sections { display: grid; grid-template-columns: 1fr; gap: 8px; }
+.op-sections { display: grid; grid-template-columns: 1fr; gap: calc(8 * var(--u)); }
 /* Operator, Oscillator and Level Scaling: all of a section's boxes on one line */
-.op-sec .fields.one-row { grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); grid-template-columns: none; gap: 3px; }
+.op-sec .fields.one-row { grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); grid-template-columns: none; gap: calc(3 * var(--u)); }
 .op .one-row .field select { appearance: none; -webkit-appearance: none; padding: 2px 1px; text-align: center; text-align-last: center; cursor: pointer; }
-.op .one-row .field input[type=number] { padding: 2px 1px; text-align: center; }
+.op .one-row .field input[type=number] { padding: calc(2 * var(--u)) 1px; text-align: center; }
 .op-sec h4 { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.op .field > span { font-size: 9px; letter-spacing: .2px; }
-.op .field input[type=number], .op .field select { font-size: 12px; height: 22px; }
-.op-sec h4 { margin: 0 0 4px; font-size: 10px; color: var(--accent-3); letter-spacing: 1px; text-transform: uppercase; font-weight: 600; }
-.op-sec .fields { grid-template-columns: repeat(auto-fill, minmax(58px, 1fr)); gap: 5px 6px; }
-.op-sec .eg-fields { gap: 5px 4px; }
-.op .field input[type=number], .op .field select { padding: 2px 3px; }
+.op .field > span { font-size: calc(9 * var(--u)); letter-spacing: .2px; }
+.op .field input[type=number], .op .field select { font-size: calc(12 * var(--u)); height: calc(22 * var(--u)); }
+.op-sec h4 { margin: 0 0 calc(4 * var(--u)); font-size: calc(10 * var(--u)); color: var(--accent-3); letter-spacing: 1px; text-transform: uppercase; font-weight: 600; }
+.op-sec .fields { grid-template-columns: repeat(auto-fill, minmax(calc(58 * var(--u)), 1fr)); gap: calc(5 * var(--u)) calc(6 * var(--u)); }
+.op-sec .eg-fields { gap: calc(5 * var(--u)) calc(4 * var(--u)); }
+.op .field input[type=number], .op .field select { padding: calc(2 * var(--u)) calc(3 * var(--u)); }
 .op-sec .eg-fields { grid-template-columns: repeat(4, 1fr); }
-.level-bar { height: 4px; background: #191512; border-radius: 2px; overflow: hidden; margin-top: 2px; }
+.level-bar { height: calc(4 * var(--u)); background: #191512; border-radius: 2px; overflow: hidden; margin-top: 2px; }
 .level-bar > div { height: 100%; background: var(--carrier); }
 
 /* ---------- monitor ---------- */

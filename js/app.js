@@ -48,7 +48,7 @@
   const settings = Object.assign({
     out: '', device: 0, channel: 0, part: 0,
     liveSend: true, autoSend: true, sendAmem: true, bulkBlock: 0,
-    velocity: 100, octave: 0, cart: 'ROM1A', perfHidden: false, opLayout: 'algorithm',
+    velocity: 100, octave: 0, cart: 'ROM1A', perfHidden: false, opLayout: 'algorithm', uiScaling: 'fixed',
   }, store.get('settings', {}));
 
   const state = {
@@ -1014,6 +1014,11 @@
       refreshPorts();
     });
     $('midiConnect').addEventListener('click', enableMidi);
+    const applyUiScaling = () => document.body.classList.toggle('ui-auto', settings.uiScaling === 'auto');
+    if (settings.uiScaling !== 'auto') settings.uiScaling = 'fixed';   // unknown or missing value
+    $('uiScaling').value = settings.uiScaling;
+    applyUiScaling();
+    $('uiScaling').addEventListener('change', e => { settings.uiScaling = e.target.value; saveSettings(); applyUiScaling(); });
     $('opLayout').value = settings.opLayout;
     $('opLayout').addEventListener('change', e => { settings.opLayout = e.target.value; saveSettings(); updateGraphics(); });
 
