@@ -63,3 +63,4 @@ to keep them as files. Saved files are VMEM followed by AMEM, which DX7 tools ca
 ## Changelog
 
 - 1/Nov/2026: First version of the editor.
+- 3/Nov/2026: New Op Layout option in the top bar to switch the operator panels between the algorithm layout and all six operators side by side in order (OP1–OP6).

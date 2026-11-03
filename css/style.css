@@ -48,6 +48,9 @@ button, select, input { font: inherit; color: inherit; }
 .setup-fields { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
 .setup-fields label { display: flex; gap: 6px; align-items: center; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
 .setup-fields select { max-width: 220px; }
+.setup-right { margin-left: auto; }
+.ops.linear { row-gap: 10px; padding-bottom: 14px; }
+.ops.linear .ops-lines { display: none; }
 .status { font-size: 12px; padding: 3px 8px; border-radius: 10px; background: #3a2f2a; color: var(--muted); }
 .status.ok { background: #24412f; color: #9fe0b0; }
 .status.err { background: #4a2020; color: #ffb0a8; }

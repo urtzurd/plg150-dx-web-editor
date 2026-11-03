@@ -48,7 +48,7 @@
   const settings = Object.assign({
     out: '', device: 0, channel: 0, part: 0,
     liveSend: true, autoSend: true, sendAmem: true, bulkBlock: 0,
-    velocity: 100, octave: 0, cart: 'ROM1A', perfHidden: false,
+    velocity: 100, octave: 0, cart: 'ROM1A', perfHidden: false, opLayout: 'algorithm',
   }, store.get('settings', {}));
 
   const state = {
@@ -588,9 +588,12 @@
     const alg = Graphics.ALGORITHMS[v[G.ALG]];
     // Operator panels mirror the algorithm: carriers on the bottom row,
     // each modulator stacked above the operator it modulates.
+    // Linear layout: all six side by side, OP1..OP6, no connection lines.
+    const linear = settings.opLayout === 'linear';
     const { pos, cols, rows } = Graphics.layout(alg);
+    $('ops').classList.toggle('linear', linear);
     // fixed-width columns (--op-w), so panels keep their size whatever the algorithm
-    $('ops').style.gridTemplateColumns = `repeat(${cols}, var(--op-w))`;
+    $('ops').style.gridTemplateColumns = `repeat(${linear ? 6 : cols}, var(--op-w))`;
     Graphics.drawAlgorithm($('algSvg'), v[G.ALG], n => (v[G.OPE] & opBit(n)) !== 0, toggleOp);
     Graphics.drawEnvelope($('pegSvg'),
       [v[G.PR1], v[G.PR2], v[G.PR3], v[G.PR4]], [v[G.PL1], v[G.PL2], v[G.PL3], v[G.PL4]], { bipolar: true });
@@ -600,8 +603,8 @@
       const on = (v[G.OPE] & opBit(n)) !== 0;
       view.root.classList.toggle('carrier', carrier);
       view.root.classList.toggle('off', !on);
-      view.root.style.gridColumn = pos[n].col + 1;
-      view.root.style.gridRow = rows - pos[n].row;
+      view.root.style.gridColumn = linear ? n : pos[n].col + 1;
+      view.root.style.gridRow = linear ? 1 : rows - pos[n].row;
       view.onBtn.textContent = on ? 'ON' : 'OFF';
       view.onBtn.classList.toggle('on', on);
       // Compare: the button shows the original state; greyed if unchanged, blinking if toggled
@@ -621,6 +624,7 @@
   }
 
   function drawOpLinks() {
+    if (settings.opLayout === 'linear') { $('opsLines').innerHTML = ''; return; }
     const v = shownVoice().vced;
     const panels = {};
     for (let n = 1; n <= 6; n++) panels[n] = opViews[n].root;
@@ -1010,6 +1014,8 @@
       refreshPorts();
     });
     $('midiConnect').addEventListener('click', enableMidi);
+    $('opLayout').value = settings.opLayout;
+    $('opLayout').addEventListener('change', e => { settings.opLayout = e.target.value; saveSettings(); updateGraphics(); });
 
     const bindCheck = (id, key) => {
       $(id).checked = settings[key];
